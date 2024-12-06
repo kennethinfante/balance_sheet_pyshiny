@@ -7,7 +7,9 @@ from shiny import App, reactive, render, ui
 
 # initial data
 bs_initial = bs_all.loc[bs_all.year == yr_initial_select]
-is_updated = 0
+
+# format
+# bs_pivot.style.format('${:,.0f}'.format)
 
 app_ui = ui.page_sidebar(
     ui.sidebar(
@@ -75,7 +77,8 @@ def server(input, output, session):
         
         bs_initial_pivot.columns = [ '_'.join([str(c) for c in c_list if c not in ('', 'std_amount_gbp')]) for c_list in bs_initial_pivot.columns.values ]
         
-        # return bs_initial_pivot
+        # for some reason, the number format in the df
+        # is discarded by the rendering - cannot do formatting in css as well
         return render.DataGrid(bs_initial_pivot)
 
     @output
@@ -97,9 +100,8 @@ def server(input, output, session):
 
         bs_pivot.columns = [ '_'.join([str(c) for c in c_list if c not in ('', 'std_amount_gbp')]) for c_list in bs_pivot.columns.values ]
 
-        update_str = "Updated on " + datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
-
         ui.remove_ui("#initial_balance_sheet")
+
         return render.DataGrid(bs_pivot)
     
     @output

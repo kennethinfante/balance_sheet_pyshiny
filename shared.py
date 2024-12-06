@@ -5,6 +5,8 @@ import numpy as np
 
 app_dir = Path(__file__).parent
 
+pd.options.display.float_format = '${:,.0f}'.format
+
 bs_all = pd.read_csv('data-raw/balance_sheet_model.csv')
 
 # custom columns
