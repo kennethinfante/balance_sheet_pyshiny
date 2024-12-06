@@ -7,8 +7,8 @@ def try_loc(df, column, values_to_search:list):
     else:
         return df
 
-def sort_val(df, by:list):
-    return df.sort_values(by=['year', 'quarter_name', 'month'])
+def sort_val(df, by:list, ascending:list):
+    return df.sort_values(by=by, ascending=ascending)
 
 # new function because df.pivot does not have the aggfunc
 def pivot_val(df, values:list, index:list, columns:list, aggfunc:str):

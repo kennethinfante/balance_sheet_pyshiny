@@ -1,10 +1,16 @@
-from shared import app_dir, bs_all, yr_filters, yr_initial_select, \
-    qtr_filters, month_filters, bs_initial
+from shared import * 
 from utils import *
 
 from datetime import datetime
 # from shiny import App, render, ui
 from shiny.express import input, render, ui
+
+# initial data
+bs_initial = bs_all.loc[bs_all.year == yr_initial_select
+                ]
+bs_initial = bs_initial.pipe(pivot_val, values=['std_amount_gbp'], index=['BS_Flag', 'category'],
+                columns=['year', 'quarter_name', 'month_num_name'], aggfunc='sum'
+                ).reset_index(drop=False)
 
 with ui.sidebar(open="desktop"):
 
@@ -26,18 +32,21 @@ with ui.sidebar(open="desktop"):
 
 @render.data_frame
 def update_balance_sheet():
-    bs_update = bs_all.pipe(try_loc, "year", input.chk_year()
+
+    year_selected = [int(y) for y in input.chk_year()]
+    
+    bs_update = bs_all.pipe(try_loc, "year", year_selected
                 ).pipe(try_loc, "quarter_name", input.chk_quarter()
-                ).pipe(try_loc, "month_name", input.chk_month()
-                ).pipe(sort_val, by=['year', 'quarter_name', 'month'])
+                ).pipe(try_loc, "month_name", input.chk_month())
+                # ).pipe(sort_val, by=['year', 'quarter_name', 'month_num_name'], ascending=[False, True, True])
 
     # pd.pivot_table is different from df.pivot
     bs_pivot = bs_update.pipe(pivot_val, values=['std_amount_gbp'], index=['BS_Flag', 'category'],
-                columns=['year', 'quarter_name', 'month_name'], aggfunc='sum'
+                columns=['year', 'quarter_name', 'month_num_name'], aggfunc='sum'
                 ).reset_index(drop=False)
 
-    print(bs_pivot.columns)
     bs_pivot.columns = [ '_'.join([str(c) for c in c_list if c not in ('', 'std_amount_gbp')]) for c_list in bs_pivot.columns.values ]
+
     update_str = "Updated on " + datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
 
     return bs_pivot
