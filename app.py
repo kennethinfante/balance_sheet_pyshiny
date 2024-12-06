@@ -54,12 +54,19 @@ def update_chk_month():
     month_filters = date_filters.pipe(try_loc, 'year', year_selected
                     ).pipe(try_loc, 'quarter_name', input.chk_quarter()
                     ).month_name.drop_duplicates()
-    print(month_filters)
     ui.update_checkbox_group("chk_month", choices={mo:mo for mo in month_filters})
 
-@render.data_frame
-def update_balance_sheet():
+@reactive.effect
+@reactive.event(input.reset)
+def reset_filters():
+    ui.update_checkbox_group("chk_year", selected=[])
+    ui.update_checkbox_group("chk_quarter", selected=[])
+    ui.update_checkbox_group("chk_month", selected=[])
 
+@render.data_frame
+@reactive.event(input.apply)
+def update_balance_sheet():
+    # print(input.apply._value)
     year_selected = [int(y) for y in input.chk_year()]
 
     bs_update = bs_all.pipe(try_loc, "year", year_selected
