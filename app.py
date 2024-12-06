@@ -2,6 +2,7 @@ from shared import *
 from utils import *
 
 from datetime import datetime
+import time
 
 from shiny import App, reactive, render, ui
 
@@ -36,6 +37,7 @@ app_ui = ui.page_sidebar(
     ui.card(
         ui.card_header("As Adjusted"),
         ui.output_text("last_update"),
+        ui.busy_indicators.use(),
         ui.output_data_frame("initial_balance_sheet"),
         ui.output_data_frame("update_balance_sheet")
     ),
@@ -50,7 +52,7 @@ def server(input, output, session):
         year_selected = [int(y) for y in input.chk_year()]
         qtr_filters = date_filters.pipe(try_loc, 'year', year_selected
                         ).quarter_name.drop_duplicates()
-        ui.update_checkbox_group("chk_quarter", choices={qtr:qtr for qtr in qtr_filters})
+        ui.update_checkbox_group("chk_quarter", choices={qtr:qtr for qtr in qtr_filters}, selected=input.chk_quarter() if input.chk_quarter() else None)
 
     @reactive.effect
     @reactive.event(input.chk_year, input.chk_quarter)
@@ -59,7 +61,7 @@ def server(input, output, session):
         month_filters = date_filters.pipe(try_loc, 'year', year_selected
                         ).pipe(try_loc, 'quarter_name', input.chk_quarter()
                         ).month_name.drop_duplicates()
-        ui.update_checkbox_group("chk_month", choices={mo:mo for mo in month_filters})
+        ui.update_checkbox_group("chk_month", choices={mo:mo for mo in month_filters}, selected=input.chk_month() if input.chk_month() else None)
 
     @reactive.effect
     @reactive.event(input.reset)
@@ -86,6 +88,7 @@ def server(input, output, session):
     @reactive.event(input.apply)
     def update_balance_sheet():
         # print(input.apply._value)
+        # time.sleep(3) # test spinner
         year_selected = [int(y) for y in input.chk_year()]
 
         bs_update = bs_all.pipe(try_loc, "year", year_selected
