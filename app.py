@@ -7,6 +7,7 @@ from shiny import App, reactive, render, ui
 
 # initial data
 bs_initial = bs_all.loc[bs_all.year == yr_initial_select]
+is_updated = 0
 
 app_ui = ui.page_sidebar(
     ui.sidebar(
@@ -32,6 +33,7 @@ app_ui = ui.page_sidebar(
     ),
     ui.card(
         ui.card_header("As Adjusted"),
+        ui.output_text("last_update"),
         ui.output_data_frame("initial_balance_sheet"),
         ui.output_data_frame("update_balance_sheet")
     ),
@@ -64,6 +66,7 @@ def server(input, output, session):
         ui.update_checkbox_group("chk_quarter", selected=[])
         ui.update_checkbox_group("chk_month", selected=[])
 
+    @output
     @render.data_frame
     def initial_balance_sheet():
         bs_initial_pivot = bs_initial.pipe(pivot_val, values=['std_amount_gbp'], index=['BS_Flag', 'category'],
@@ -75,6 +78,7 @@ def server(input, output, session):
         # return bs_initial_pivot
         return render.DataGrid(bs_initial_pivot)
 
+    @output
     @render.data_frame
     @reactive.event(input.apply)
     def update_balance_sheet():
@@ -97,5 +101,12 @@ def server(input, output, session):
 
         ui.remove_ui("#initial_balance_sheet")
         return render.DataGrid(bs_pivot)
+    
+    @output
+    @render.text
+    @reactive.event(input.apply)
+    def last_update():
+        update_str = "Updated on " + datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
+        return update_str
     
 app = App(app_ui, server)
