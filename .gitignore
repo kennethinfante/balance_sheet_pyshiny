@@ -59,3 +59,4 @@ __pycache__
 ######################
 data-raw/tips.csv
 test.py
+rsconnect-python/

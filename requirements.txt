@@ -42,14 +42,17 @@ prompt-toolkit==3.0.36
 ptyprocess==0.7.0
 pure_eval==0.2.3
 Pygments==2.18.0
+PyJWT==2.10.1
 pyparsing==3.2.0
 python-dateutil==2.9.0.post0
 python-multipart==0.0.19
 pytz==2024.2
 questionary==2.0.1
 ridgeplot==0.2.1
+rsconnect_python==1.24.0
 scipy==1.14.1
 seaborn==0.13.2
+semver==2.13.0
 shiny==1.2.1
 shinywidgets==0.3.4
 six==1.16.0
