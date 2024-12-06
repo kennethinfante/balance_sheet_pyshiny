@@ -6,5 +6,6 @@ This is my project in using Shiny for Python to show balance sheet pivot table.
 * Arrange month_name by months - ok
 * Add conditional checkboxes
 * Add apply, reset button
+* Format the numbers
 * Add totals
 * Highlight totals

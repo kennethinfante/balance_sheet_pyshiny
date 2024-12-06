@@ -26,6 +26,3 @@ date_filters = date_filters.sort_values(by=['year', 'quarter_name', 'month'], as
 yr_filters = date_filters.year.drop_duplicates()
 
 yr_initial_select = yr_filters[0]
-
-qtr_filters = date_filters.quarter_name.drop_duplicates()
-month_filters = date_filters.month_name.drop_duplicates()

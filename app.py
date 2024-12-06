@@ -3,7 +3,8 @@ from utils import *
 
 from datetime import datetime
 # from shiny import App, render, ui
-from shiny.express import input, render, ui
+from shiny import reactive, render
+from shiny.express import input, ui
 
 # initial data
 bs_initial = bs_all.loc[bs_all.year == yr_initial_select
@@ -12,7 +13,13 @@ bs_initial = bs_initial.pipe(pivot_val, values=['std_amount_gbp'], index=['BS_Fl
                 columns=['year', 'quarter_name', 'month_num_name'], aggfunc='sum'
                 ).reset_index(drop=False)
 
-with ui.sidebar(open="desktop"):
+# qtr_filters = date_filters.quarter_name.drop_duplicates()
+# month_filters = date_filters.month_name.drop_duplicates()
+
+# Add page title and sidebar
+ui.page_opts(title="Balance Sheet", fillable=True)
+
+with ui.sidebar(open="desktop", width=200):
 
     ui.input_checkbox_group(  
         "chk_year",  
@@ -22,19 +29,39 @@ with ui.sidebar(open="desktop"):
     ui.input_checkbox_group(  
         "chk_quarter",  
         "Quarter",  
-        {qtr:qtr for qtr in qtr_filters},
+        {},
     )  
     ui.input_checkbox_group(  
         "chk_month",  
         "Month",  
-        {mo:mo for mo in month_filters},
+        {},
     )
+    ui.input_action_button("apply", "Apply")
+    ui.input_action_button("reset", "Reset")
+
+@reactive.effect
+@reactive.event(input.chk_year)
+def update_chk_quarter():
+    year_selected = [int(y) for y in input.chk_year()]
+    qtr_filters = date_filters.pipe(try_loc, 'year', year_selected
+                    ).quarter_name.drop_duplicates()
+    ui.update_checkbox_group("chk_quarter", choices={qtr:qtr for qtr in qtr_filters})
+
+@reactive.effect
+@reactive.event(input.chk_year, input.chk_quarter)
+def update_chk_month():
+    year_selected = [int(y) for y in input.chk_year()]
+    month_filters = date_filters.pipe(try_loc, 'year', year_selected
+                    ).pipe(try_loc, 'quarter_name', input.chk_quarter()
+                    ).month_name.drop_duplicates()
+    print(month_filters)
+    ui.update_checkbox_group("chk_month", choices={mo:mo for mo in month_filters})
 
 @render.data_frame
 def update_balance_sheet():
 
     year_selected = [int(y) for y in input.chk_year()]
-    
+
     bs_update = bs_all.pipe(try_loc, "year", year_selected
                 ).pipe(try_loc, "quarter_name", input.chk_quarter()
                 ).pipe(try_loc, "month_name", input.chk_month())
