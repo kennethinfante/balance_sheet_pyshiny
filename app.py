@@ -96,11 +96,20 @@ def server(input, output, session):
         bs_update = bs_all.pipe(try_loc, "year", yr_selected
                     ).pipe(try_loc, "quarter_name", qtr_selected
                     ).pipe(try_loc, "month_name", mo_selected)
-        # ).pipe(sort_val, by=['year', 'quarter_name', 'month_num_name'], ascending=[False, True, True])
+        
+        # note that in if-elif only one condition is run
+        # it returns early as much as possible
+        cols_to_pivot = []
+        if yr_selected: cols_to_pivot.append('year')
+        if qtr_selected: cols_to_pivot.append('quarter_name')
+        if mo_selected: cols_to_pivot.append('month_num_name')
+        
+        if cols_to_pivot == []:
+            return pd.DataFrame()
 
         # pd.pivot_table is different from df.pivot
         bs_pivot = bs_update.pipe(pivot_val, values=['std_amount_gbp'], index=['BS_Flag', 'category'],
-                    columns=['year', 'quarter_name', 'month_num_name'], aggfunc='sum'
+                    columns=cols_to_pivot, aggfunc='sum'
                     ).reset_index(drop=False)
 
         bs_pivot.columns = [ '_'.join([str(c) for c in c_list if c not in ('', 'std_amount_gbp')]) for c_list in bs_pivot.columns.values ]
