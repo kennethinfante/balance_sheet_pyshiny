@@ -11,5 +11,12 @@ This is my project in using Shiny for Python to show balance sheet pivot table.
 * Retain selections when adding new filters - ok
 * Spinner - ok
 * Format the numbers - not possible for now
+* Make the columns to pivot dynamic - ok
 * Add totals
 * Highlight totals
+
+## Deployment
+
+```
+rsconnect deploy shiny . --name kinfante --title balance_sheet_pyshiny
+```
