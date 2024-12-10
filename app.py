@@ -76,9 +76,9 @@ def server(input, output, session):
         bs_initial_pivot = bs_initial.pipe(pivot_val, values=['std_amount_gbp'], index=['BS_Flag', 'category'],
             columns=['year', 'quarter_name', 'month_num_name'], aggfunc='sum'
             ).reset_index(drop=False)
-        
+
         bs_initial_pivot.columns = [ '_'.join([str(c) for c in c_list if c not in ('', 'std_amount_gbp')]) for c_list in bs_initial_pivot.columns.values ]
-        
+
         # for some reason, the number format in the df
         # is discarded by the rendering - cannot do formatting in css as well
         return render.DataGrid(bs_initial_pivot)
@@ -89,12 +89,14 @@ def server(input, output, session):
     def update_balance_sheet():
         # print(input.apply._value)
         # time.sleep(3) # test spinner
-        year_selected = [int(y) for y in input.chk_year()]
+        yr_selected = [int(y) for y in input.chk_year()]
+        qtr_selected = input.chk_quarter()
+        mo_selected = input.chk_month()
 
-        bs_update = bs_all.pipe(try_loc, "year", year_selected
-                    ).pipe(try_loc, "quarter_name", input.chk_quarter()
-                    ).pipe(try_loc, "month_name", input.chk_month())
-                    # ).pipe(sort_val, by=['year', 'quarter_name', 'month_num_name'], ascending=[False, True, True])
+        bs_update = bs_all.pipe(try_loc, "year", yr_selected
+                    ).pipe(try_loc, "quarter_name", qtr_selected
+                    ).pipe(try_loc, "month_name", mo_selected)
+        # ).pipe(sort_val, by=['year', 'quarter_name', 'month_num_name'], ascending=[False, True, True])
 
         # pd.pivot_table is different from df.pivot
         bs_pivot = bs_update.pipe(pivot_val, values=['std_amount_gbp'], index=['BS_Flag', 'category'],
@@ -106,12 +108,12 @@ def server(input, output, session):
         ui.remove_ui("#initial_balance_sheet")
 
         return render.DataGrid(bs_pivot)
-    
+
     @output
     @render.text
     @reactive.event(input.apply)
     def last_update():
         update_str = "Updated on " + datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
         return update_str
-    
+
 app = App(app_ui, server)
