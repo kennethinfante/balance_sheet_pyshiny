@@ -79,9 +79,19 @@ def server(input, output, session):
 
         bs_initial_pivot.columns = [ '_'.join([str(c) for c in c_list if c not in ('', 'std_amount_gbp')]) for c_list in bs_initial_pivot.columns.values ]
 
-        # for some reason, the number format in the df
-        # is discarded by the rendering - cannot do formatting in css as well
-        return render.DataGrid(bs_initial_pivot)
+        amount_cols = {
+            k: v
+            for k, v in enumerate(bs_initial_pivot.columns)
+            if v not in ("BS_Flag", "category")
+        }
+
+        # numbers converted to string to retain format
+        for col in amount_cols.values():
+            bs_initial_pivot[str(col)] = bs_initial_pivot[str(col)].map("${:,.0f}".format)
+        
+        # use css to align the str-formatted numbers
+        amount_cols_idx = list(amount_cols.keys())
+        return render.DataGrid(bs_initial_pivot, styles=pivot_style(amount_cols_idx))
 
     @output
     @render.data_frame
@@ -114,11 +124,19 @@ def server(input, output, session):
 
         bs_pivot.columns = [ '_'.join([str(c) for c in c_list if c not in ('', 'std_amount_gbp')]) for c_list in bs_pivot.columns.values ]
 
-        cols_index = [ind for ind, c in enumerate(bs_pivot.columns)][2:]
+        amount_cols = {
+            k: v
+            for k, v in enumerate(bs_pivot.columns)
+            if v not in ("BS_Flag", "category")
+        }
+
+        for col in amount_cols.values():
+            bs_pivot[str(col)] = bs_pivot[str(col)].map("${:,.0f}".format)
 
         ui.remove_ui("#initial_balance_sheet")
-
-        return render.DataGrid(bs_pivot, styles=pivot_style(cols_index))
+        
+        amount_cols_idx = list(amount_cols.keys())
+        return render.DataGrid(bs_pivot, styles=pivot_style(amount_cols_idx))
 
     @output
     @render.text

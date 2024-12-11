@@ -24,8 +24,7 @@ def pivot_style(cols_index:list):
             "location": "body",
             "cols": cols_index,
             "style": {
-                "grouping-separator": ",",
-                "decimal-separator": "."
+                "text-align":"right"
             }
         }
     ]

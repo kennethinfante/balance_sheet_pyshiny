@@ -10,7 +10,7 @@ This is my project in using Shiny for Python to show balance sheet pivot table.
 * Add last update marking - ok
 * Retain selections when adding new filters - ok
 * Spinner - ok
-* Format the numbers - not possible for now
+* Format the numbers - ok
 * Make the columns to pivot dynamic - ok
 * Add totals
 * Highlight totals
