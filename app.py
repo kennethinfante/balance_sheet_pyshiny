@@ -96,14 +96,14 @@ def server(input, output, session):
         bs_update = bs_all.pipe(try_loc, "year", yr_selected
                     ).pipe(try_loc, "quarter_name", qtr_selected
                     ).pipe(try_loc, "month_name", mo_selected)
-        
+
         # note that in if-elif only one condition is run
         # it returns early as much as possible
         cols_to_pivot = []
         if yr_selected: cols_to_pivot.append('year')
         if qtr_selected: cols_to_pivot.append('quarter_name')
         if mo_selected: cols_to_pivot.append('month_num_name')
-        
+
         if cols_to_pivot == []:
             return pd.DataFrame()
 
@@ -114,9 +114,11 @@ def server(input, output, session):
 
         bs_pivot.columns = [ '_'.join([str(c) for c in c_list if c not in ('', 'std_amount_gbp')]) for c_list in bs_pivot.columns.values ]
 
+        cols_index = [ind for ind, c in enumerate(bs_pivot.columns)][2:]
+
         ui.remove_ui("#initial_balance_sheet")
 
-        return render.DataGrid(bs_pivot)
+        return render.DataGrid(bs_pivot, styles=pivot_style(cols_index))
 
     @output
     @render.text

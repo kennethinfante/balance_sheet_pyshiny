@@ -16,3 +16,16 @@ def pivot_val(df, values:list, index:list, columns:list, aggfunc:str):
         return pd.pivot_table(df, values, index, columns, aggfunc)
     except Exception as error:
         print('Error producing pivot table: ' + repr(error))
+
+
+def pivot_style(cols_index:list):
+    return [
+        {
+            "location": "body",
+            "cols": cols_index,
+            "style": {
+                "grouping-separator": ",",
+                "decimal-separator": "."
+            }
+        }
+    ]
