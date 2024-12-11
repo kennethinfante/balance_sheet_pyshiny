@@ -11,9 +11,9 @@ def sort_val(df, by:list, ascending:list):
     return df.sort_values(by=by, ascending=ascending)
 
 # new function because df.pivot does not have the aggfunc
-def pivot_val(df, values:list, index:list, columns:list, aggfunc:str):
+def pivot_val(df, values:list, index:list, columns:list, aggfunc:str, margins:bool=False):
     try:
-        return pd.pivot_table(df, values, index, columns, aggfunc)
+        return pd.pivot_table(df, values, index, columns, aggfunc, margins)
     except Exception as error:
         print('Error producing pivot table: ' + repr(error))
 

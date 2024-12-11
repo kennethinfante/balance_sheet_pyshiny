@@ -2,7 +2,7 @@
 
 This is my project in using Shiny for Python to show balance sheet pivot table.
 
-## TODO
+## TODO`
 * Arrange month_name by months - ok
 * Add conditional checkboxes - ok
 * Add apply, reset button - ok
@@ -18,5 +18,5 @@ This is my project in using Shiny for Python to show balance sheet pivot table.
 ## Deployment
 
 ```
-rsconnect deploy shiny . --name kinfante --title balance_sheet_pyshiny
+rsconnect deploy shiny . --name kinfante --title balance_sheet_pyshiny -x "data-raw/tips.csv" "test.py"
 ```
