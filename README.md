@@ -14,6 +14,7 @@ This is my project in using Shiny for Python to show balance sheet pivot table.
 * Make the columns to pivot dynamic - ok
 * Add totals - ok
 * Highlight totals - ok
+* Added error checking like for the formula for DAX in PBI - ok
 
 ## Deployment
 

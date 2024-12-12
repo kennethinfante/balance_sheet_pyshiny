@@ -16,7 +16,7 @@ bs_all['month_num_name'] = bs_all['month'].astype('str') + bs_all['month_name']
 
 # select only relevant columns
 # month is still needed for filtering
-columns_to_show = ['year', 'quarter_name', 'month_name', 'month_num_name', 'BS_Flag', 'category', 'NS_BS_Flag', 'ns_category', 'account_name', 'std_amount_gbp']
+columns_to_show = ['year', 'quarter_name', 'month_name', 'month_num_name', 'BS_Flag', 'category', 'NS_BS_Flag', 'ns_category', 'account_name', 'std_amount_gbp', 'is_year_end', 'is_quarter_end']
 
 bs_all= bs_all[columns_to_show]
 date_filters = pd.read_csv('data-raw/date_filters.csv')

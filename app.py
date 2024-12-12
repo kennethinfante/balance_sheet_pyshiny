@@ -85,7 +85,6 @@ def server(input, output, session):
             "Assets"
         ].sum()
 
-        # %%
         bs_initial_flat = bs_initial_pivot.reset_index().sort_values(by=['BS_Flag', 'category']).reset_index(drop=True)
 
         bs_initial_flat.columns = flatten_columns(bs_initial_flat)
@@ -98,7 +97,9 @@ def server(input, output, session):
 
         # numbers converted to string to retain format
         for col in amount_cols.values():
-            bs_initial_flat[str(col)] = bs_initial_flat[str(col)].map("${:,.0f}".format)
+            bs_initial_flat[str(col)] = bs_initial_flat[str(col)].map(
+                "£ {:,.0f}".format
+            )
 
         # use css to align the str-formatted numbers
         cols_to_align = list(amount_cols.keys())
@@ -117,10 +118,6 @@ def server(input, output, session):
         qtr_selected = input.chk_quarter()
         mo_selected = input.chk_month()
 
-        bs_update = bs_all.pipe(try_loc, "year", yr_selected
-                    ).pipe(try_loc, "quarter_name", qtr_selected
-                    ).pipe(try_loc, "month_name", mo_selected)
-
         # note that in if-elif only one condition is run
         # it returns early as much as possible
         cols_to_pivot = []
@@ -128,8 +125,22 @@ def server(input, output, session):
         if qtr_selected: cols_to_pivot.append('quarter_name')
         if mo_selected: cols_to_pivot.append('month_num_name')
 
-        if cols_to_pivot == []:
+        # invalid combination of rows to pivot
+        if (cols_to_pivot == []) or (cols_to_pivot == ['quarter_name', 'month_num_name']):
+            ui.remove_ui("#initial_balance_sheet")
             return pd.DataFrame()
+
+        # filter to the appropriate row only - equivalent of DAX
+        if cols_to_pivot == ["year"]:
+            bs_filtered = bs_all[bs_all.is_year_end == 1]
+        elif cols_to_pivot == ["year", "quarter_name"]:
+            bs_filtered = bs_all[bs_all.is_quarter_end == 1]
+        else:
+            bs_filtered = bs_all
+
+        bs_update = bs_filtered.pipe(try_loc, "year", yr_selected
+                    ).pipe(try_loc, "quarter_name", qtr_selected
+                    ).pipe(try_loc, "month_name", mo_selected)
 
         # pd.pivot_table is different from df.pivot
         bs_pivot = bs_update.pipe(pivot_val, values=['std_amount_gbp'], index=['BS_Flag', 'category'],
@@ -145,7 +156,6 @@ def server(input, output, session):
             "Assets"
         ].sum()
 
-        # %%
         bs_flat = (
             bs_pivot.reset_index()
             .sort_values(by=["BS_Flag", "category"])
@@ -161,7 +171,7 @@ def server(input, output, session):
         }
 
         for col in amount_cols.values():
-            bs_flat[str(col)] = bs_flat[str(col)].map("${:,.0f}".format)
+            bs_flat[str(col)] = bs_flat[str(col)].map("£ {:,.0f}".format)
 
         ui.remove_ui("#initial_balance_sheet")
 
