@@ -75,23 +75,37 @@ def server(input, output, session):
     def initial_balance_sheet():
         bs_initial_pivot = bs_initial.pipe(pivot_val, values=['std_amount_gbp'], index=['BS_Flag', 'category'],
             columns=['year', 'quarter_name', 'month_num_name'], aggfunc='sum'
-            ).reset_index(drop=False)
+            )
 
-        bs_initial_pivot.columns = [ '_'.join([str(c) for c in c_list if c not in ('', 'std_amount_gbp')]) for c_list in bs_initial_pivot.columns.values ]
+        # insert the totals
+        bs_initial_pivot.loc[("Liabilities & Equity Total", ""), :] = bs_initial_pivot.loc[
+            "Liabilities & Equity"
+        ].sum()
+        bs_initial_pivot.loc[("Assets Total", ""), :] = bs_initial_pivot.loc[
+            "Assets"
+        ].sum()
+
+        # %%
+        bs_initial_flat = bs_initial_pivot.reset_index().sort_values(by=['BS_Flag', 'category']).reset_index(drop=True)
+
+        bs_initial_flat.columns = flatten_columns(bs_initial_flat)
 
         amount_cols = {
             k: v
-            for k, v in enumerate(bs_initial_pivot.columns)
+            for k, v in enumerate(bs_initial_flat.columns)
             if v not in ("BS_Flag", "category")
         }
 
         # numbers converted to string to retain format
         for col in amount_cols.values():
-            bs_initial_pivot[str(col)] = bs_initial_pivot[str(col)].map("${:,.0f}".format)
-        
+            bs_initial_flat[str(col)] = bs_initial_flat[str(col)].map("${:,.0f}".format)
+
         # use css to align the str-formatted numbers
-        amount_cols_idx = list(amount_cols.keys())
-        return render.DataGrid(bs_initial_pivot, styles=pivot_style(amount_cols_idx))
+        cols_to_align = list(amount_cols.keys())
+
+        rows_to_highlight = acctg_rows_to_highlight(bs_initial_flat)
+
+        return render.DataGrid(bs_initial_flat, styles=df_style(cols_to_align, rows_to_highlight))
 
     @output
     @render.data_frame
@@ -120,23 +134,45 @@ def server(input, output, session):
         # pd.pivot_table is different from df.pivot
         bs_pivot = bs_update.pipe(pivot_val, values=['std_amount_gbp'], index=['BS_Flag', 'category'],
                     columns=cols_to_pivot, aggfunc='sum'
-                    ).reset_index(drop=False)
+                    )
 
-        bs_pivot.columns = [ '_'.join([str(c) for c in c_list if c not in ('', 'std_amount_gbp')]) for c_list in bs_pivot.columns.values ]
+        # insert the totals - note that Assets Totals instead of Total Assets to help with sorting
+        # it is easier to add totals before flatting the pivot table
+        bs_pivot.loc[("Liabilities & Equity Total", ""), :] = (
+            bs_pivot.loc["Liabilities & Equity"].sum()
+        )
+        bs_pivot.loc[("Assets Total", ""), :] = bs_pivot.loc[
+            "Assets"
+        ].sum()
+
+        # %%
+        bs_flat = (
+            bs_pivot.reset_index()
+            .sort_values(by=["BS_Flag", "category"])
+            .reset_index(drop=True) # do not add the old index as new col
+        )
+
+        bs_flat.columns = flatten_columns(bs_flat)
 
         amount_cols = {
             k: v
-            for k, v in enumerate(bs_pivot.columns)
+            for k, v in enumerate(bs_flat.columns)
             if v not in ("BS_Flag", "category")
         }
 
         for col in amount_cols.values():
-            bs_pivot[str(col)] = bs_pivot[str(col)].map("${:,.0f}".format)
+            bs_flat[str(col)] = bs_flat[str(col)].map("${:,.0f}".format)
 
         ui.remove_ui("#initial_balance_sheet")
-        
-        amount_cols_idx = list(amount_cols.keys())
-        return render.DataGrid(bs_pivot, styles=pivot_style(amount_cols_idx))
+
+        # use css to align the str-formatted numbers
+        cols_to_align = list(amount_cols.keys())
+
+        rows_to_highlight = acctg_rows_to_highlight(bs_flat)
+
+        return render.DataGrid(
+            bs_flat, styles=df_style(cols_to_align, rows_to_highlight)
+        )
 
     @output
     @render.text

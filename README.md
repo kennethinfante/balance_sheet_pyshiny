@@ -12,8 +12,8 @@ This is my project in using Shiny for Python to show balance sheet pivot table.
 * Spinner - ok
 * Format the numbers - ok
 * Make the columns to pivot dynamic - ok
-* Add totals
-* Highlight totals
+* Add totals - ok
+* Highlight totals - ok
 
 ## Deployment
 

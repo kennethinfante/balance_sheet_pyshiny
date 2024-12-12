@@ -18,13 +18,26 @@ def pivot_val(df, values:list, index:list, columns:list, aggfunc:str, margins:bo
         print('Error producing pivot table: ' + repr(error))
 
 
-def pivot_style(cols_index:list):
+def df_style(col_index:list, row_index:list):
     return [
+        {"location": "body", "cols": col_index, "style": {"text-align": "right"}},
         {
             "location": "body",
-            "cols": cols_index,
+            "rows": row_index,
             "style": {
-                "text-align":"right"
-            }
-        }
+                "background-color": "lightblue",
+            },
+        },
     ]
+
+def flatten_columns(df):
+    return [
+        "_".join([str(c) for c in c_list if c not in ("", "std_amount_gbp")])
+        for c_list in df.columns.values
+    ]
+
+def acctg_rows_to_highlight(df):
+    ta_row = int(df.loc[df.BS_Flag == "Assets Total"].index[0])
+    tl_row = int(df.loc[df.BS_Flag == "Liabilities & Equity Total"].index[0])
+
+    return [ta_row, tl_row]
