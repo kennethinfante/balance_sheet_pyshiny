@@ -25,6 +25,8 @@ date_filters = pd.read_csv('data-raw/date_filters.csv')
 date_filters = date_filters.sort_values(by=['year', 'quarter_name', 'month'], ascending=[False, True, True], ignore_index=True)
 
 # initial filters
-yr_filters = date_filters.year.drop_duplicates()
+yr_filters = date_filters.year.drop_duplicates().sort_values(
+    ascending=False, ignore_index=True
+)
 
 yr_initial_select = yr_filters[0]

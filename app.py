@@ -14,19 +14,23 @@ bs_initial = bs_all.loc[bs_all.year == yr_initial_select]
 
 app_ui = ui.page_sidebar(
     ui.sidebar(
-        ui.input_checkbox_group(  
-            "chk_year",  
-            "Year",  
-            {yr:yr for yr in yr_filters},
+        ui.input_checkbox(
+            "chk_year_all",
+            "Year",
         ),
-        ui.input_checkbox_group(  
-            "chk_quarter",  
-            "Quarter",  
+        ui.input_checkbox_group(
+            "chk_year",
+            "",
+            [yr for yr in yr_filters],
+        ),
+        ui.input_checkbox_group(
+            "chk_quarter",
+            "Quarter",
             {},
         ),
-        ui.input_checkbox_group(  
-            "chk_month",  
-            "Month",  
+        ui.input_checkbox_group(
+            "chk_month",
+            "Month",
             {},
         ),
         ui.input_action_button("apply", "Apply"),
@@ -39,7 +43,7 @@ app_ui = ui.page_sidebar(
         ui.output_text("last_update"),
         ui.busy_indicators.use(),
         ui.output_data_frame("initial_balance_sheet"),
-        ui.output_data_frame("update_balance_sheet")
+        ui.output_data_frame("update_balance_sheet"),
     ),
     title="Balance Sheet",
     fillable=True,
@@ -49,10 +53,12 @@ def server(input, output, session):
     @reactive.effect
     @reactive.event(input.chk_year)
     def update_chk_quarter():
+        print(input.chk_year())
         year_selected = [int(y) for y in input.chk_year()]
         qtr_filters = date_filters.pipe(try_loc, 'year', year_selected
                         ).quarter_name.drop_duplicates()
-        ui.update_checkbox_group("chk_quarter", choices={qtr:qtr for qtr in qtr_filters}, selected=input.chk_quarter() if input.chk_quarter() else None)
+        # note that the choices cannot be just the Series, otherwise the underlying value will be the indices
+        ui.update_checkbox_group("chk_quarter", choices=[qtr for qtr in qtr_filters], selected=input.chk_quarter() if input.chk_quarter() else None)
 
     @reactive.effect
     @reactive.event(input.chk_year, input.chk_quarter)
@@ -61,7 +67,7 @@ def server(input, output, session):
         month_filters = date_filters.pipe(try_loc, 'year', year_selected
                         ).pipe(try_loc, 'quarter_name', input.chk_quarter()
                         ).month_name.drop_duplicates()
-        ui.update_checkbox_group("chk_month", choices={mo:mo for mo in month_filters}, selected=input.chk_month() if input.chk_month() else None)
+        ui.update_checkbox_group("chk_month", choices=[mo for mo in month_filters], selected=input.chk_month() if input.chk_month() else None)
 
     @reactive.effect
     @reactive.event(input.reset)
