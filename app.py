@@ -5,33 +5,31 @@ from datetime import datetime
 import time
 
 from shiny import App, reactive, render, ui
+from htmltools import div
 
 # initial data
 bs_initial = bs_all.loc[bs_all.year == yr_initial_select]
 
 # format
 # bs_pivot.style.format('${:,.0f}'.format)
+all_years = [yr for yr in yr_filters]
 
 app_ui = ui.page_sidebar(
     ui.sidebar(
-        ui.input_checkbox(
-            "chk_year_all",
-            "Year",
-        ),
         ui.input_checkbox_group(
             "chk_year",
-            "",
-            [yr for yr in yr_filters],
+            "Year",
+            all_years,
         ),
         ui.input_checkbox_group(
             "chk_quarter",
             "Quarter",
-            {},
+            [],
         ),
         ui.input_checkbox_group(
             "chk_month",
             "Month",
-            {},
+            []
         ),
         ui.input_action_button("apply", "Apply"),
         ui.input_action_button("reset", "Reset"),
@@ -53,7 +51,6 @@ def server(input, output, session):
     @reactive.effect
     @reactive.event(input.chk_year)
     def update_chk_quarter():
-        print(input.chk_year())
         year_selected = [int(y) for y in input.chk_year()]
         qtr_filters = date_filters.pipe(try_loc, 'year', year_selected
                         ).quarter_name.drop_duplicates()
